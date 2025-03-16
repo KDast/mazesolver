@@ -1,4 +1,6 @@
 from tkinter import Tk, BOTH, Canvas
+import random
+import time
 
 class Window():
     def __init__(self, width, height):
@@ -55,7 +57,7 @@ class Cell():
 
 
     def draw(self, x1, y1, x2, y2,):
-        if self._win is None:
+        if self.win is None:
             return
         self._x1 = x1
         self._x2 = x2
@@ -111,30 +113,35 @@ class Maze():
         self.cell_size_y = cell_size_y
         self.cell_size_x = cell_size_x
         self.win = win
+        self.cells = []
+        self._create_cells()
 
     def _create_cells(self):
-        self.cells = []
-        for cols in self.num_cols:
+            
+        for i in range(self.num_cols):
             row_list = []
-            for rows in self.num_rows:
-                row_list.append(Cell(self.cell_size_x, self.cell_size_y))
+            for j in range(self.num_rows):
+                row_list.append(Cell(self.win))
             self.cells.append(row_list)
-        for i in range(self.cells):
-            for j in range(self.cells[i]):
+        for i in range(self.num_cols):
+            for j in range(self.num_rows):
                 self._draw_cell( i, j )
 
     def _draw_cell(self, i, j):
-        x1_pos = i * self.cell_size_x
+        x1_pos = self.x1 + i * self.cell_size_x
         x2_pos = x1_pos + self.cell_size_x
-        y1_pos = j * self.cell_size_y
+        y1_pos = self.y1 + j * self.cell_size_y
         y2_pos = y1_pos + self.cell_size_y
-        cell_to_draw = Cell(self.win)
-        cell_to_draw.draw(x1_pos, y1_pos, x2_pos, y2_pos)
+        
+        self.cells[i][j].draw(x1_pos, y1_pos, x2_pos, y2_pos)
         self._animate()
 
     def _animate(self):
+        if self.win is None:
+            return
         self.win.redraw()
         time.sleep(0.05)
+
         
 
 
