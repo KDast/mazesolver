@@ -43,7 +43,7 @@ class Line():
 
     
 class Cell():
-    def __init__(self, win):
+    def __init__(self, win=None):
         self.has_left_wall = True
         self.has_right_wall = True
         self.has_top_wall = True
@@ -78,7 +78,20 @@ class Cell():
             self.win.draw_line(bottom_wall, "purple") 
         if self.has_top_wall == True:
             top_wall = Line(top_left, top_right)
-            self.win.draw_line(top_wall, "purple") 
+            self.win.draw_line(top_wall, "purple")
+
+        if self.has_left_wall == False:
+            left_wall = Line(top_left, bottom_left)
+            self.win.draw_line(left_wall, "white") 
+        if self.has_right_wall == False:
+            right_wall = Line(top_right, bottom_right)
+            self.win.draw_line(right_wall, "white") 
+        if self.has_bottom_wall == False:
+            bottom_wall = Line(bottom_left, bottom_right)
+            self.win.draw_line(bottom_wall, "white") 
+        if self.has_top_wall == False:
+            top_wall = Line(top_left, top_right)
+            self.win.draw_line(top_wall, "white") 
 
     def draw_move(self, to_cell, undo=False):
         half_length = abs(self._x2 - self._x1) // 2
@@ -104,7 +117,7 @@ class Maze():
         num_cols,
         cell_size_x,
         cell_size_y,
-        win,
+        win=None,
     ):
         self.x1 = x1
         self.y1 = y1
@@ -115,6 +128,7 @@ class Maze():
         self.win = win
         self.cells = []
         self._create_cells()
+        self._break_entrance_and_exit()
 
     def _create_cells(self):
             
@@ -141,6 +155,15 @@ class Maze():
             return
         self.win.redraw()
         time.sleep(0.05)
+
+    def _break_entrance_and_exit(self):
+        entrance = self.cells[0][0]
+       
+        entrance.has_top_wall = False
+        self._draw_cell(0, 0)
+        exit = self.cells[self.num_cols-1][self.num_rows-1]
+        exit.has_bottom_wall = False
+        self._draw_cell(self.num_cols-1, self.num_rows-1)
 
         
 
