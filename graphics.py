@@ -121,71 +121,73 @@ class Maze():
         win=None,
         seed = None
     ):
-        self.x1 = x1
-        self.y1 = y1
-        self.num_rows = num_rows
-        self.num_cols = num_cols
-        self.cell_size_y = cell_size_y
-        self.cell_size_x = cell_size_x
-        self.win = win
-        self.cells = []
+        self._x1 = x1
+        self._y1 = y1
+        self._num_rows = num_rows
+        self._num_cols = num_cols
+        self._cell_size_y = cell_size_y
+        self._cell_size_x = cell_size_x
+        self._win = win
+        self._cells = []
         self._create_cells()
         self._break_entrance_and_exit()
+        self._break_walls_r(0,0)
         if seed != None:
             random.seed(seed)
 
+
     def _create_cells(self):
             
-        for i in range(self.num_cols):
-            row_list = []
-            for j in range(self.num_rows):
-                row_list.append(Cell(self.win))
-            self.cells.append(row_list)
-        for i in range(self.num_cols):
-            for j in range(self.num_rows):
-                self._draw_cell( i, j )
+        for i in range(self._num_cols):
+            col_cells = []
+            for j in range(self._num_rows):
+                col_cells.append(Cell(self._win))
+            self._cells.append(col_cells)
+        for i in range(self._num_cols):
+            for j in range(self._num_rows):
+                self._draw_cell(i, j)
 
     def _draw_cell(self, i, j):
-        x1_pos = self.x1 + i * self.cell_size_x
-        x2_pos = x1_pos + self.cell_size_x
-        y1_pos = self.y1 + j * self.cell_size_y
-        y2_pos = y1_pos + self.cell_size_y
-        
-        self.cells[i][j].draw(x1_pos, y1_pos, x2_pos, y2_pos)
+        if self._win is None:
+            return
+        x1 = self._x1 + i * self._cell_size_x
+        y1 = self._y1 + j * self._cell_size_y
+        x2 = x1 + self._cell_size_x
+        y2 = y1 + self._cell_size_y
+        self._cells[i][j].draw(x1, y1, x2, y2)
         self._animate()
 
     def _animate(self):
-        if self.win is None:
+        if self._win is None:
             return
-        self.win.redraw()
+        self._win.redraw()
         time.sleep(0.05)
 
     def _break_entrance_and_exit(self):
-        entrance = self.cells[0][0]
-       
-        entrance.has_top_wall = False
+        self._cells[0][0].has_top_wall = False
         self._draw_cell(0, 0)
-        exit = self.cells[self.num_cols-1][self.num_rows-1]
-        exit.has_bottom_wall = False
-        self._draw_cell(self.num_cols-1, self.num_rows-1)
+        self._cells[self._num_cols - 1][self._num_rows - 1].has_bottom_wall = False
+        self._draw_cell(self._num_cols - 1, self._num_rows - 1)
 
     def _break_walls_r(self, i, j):
+
         while True:
+        
             to_visit = []
-            self.cells[i][j].visited = True
+            self._cells[i][j].visited = True
             #looks up and down
             if i == 0: #looks at edge
                 if self.cells[i+1][j].visited == False:
                     to_visit.append(self.cells[i+1][j])
 
-            if i == len(self.num_cols-1): #looks at edge
-                if self.cells[i-1][j].visted == False:
+            if i == (self.num_cols-1): #looks at edge
+                if self.cells[i-1][j].visited == False:
                     to_visit.append(self.cells[i-1][j])
 
             else: #we are not on the edge
                 if self.cells[i+1][j].visited == False:
                     to_visit.append(self.cells[i+1][j])
-                if self.cells[i-1][j].visted == False:
+                if self.cells[i-1][j].visited == False:
                     to_visit.append(self.cells[i-1][j])
 
 
@@ -194,7 +196,7 @@ class Maze():
                 if self.cells[i][j+1].visited == False:
                     to_visit.append(self.cells[i][j+1])
 
-            if j == len(self.num_rows-1): #looks at edge
+            if j == (self.num_rows-1): #looks at edge
                 if self.cells[i][j-1].visited == False:
                     to_visit.append(self.cells[i][j-1])
 
@@ -207,22 +209,30 @@ class Maze():
             if len(to_visit) == 0:
                 self.cells._draw_cell(i, j)
                 return    
-            cell_to_visit = to_visit[random.randint(0, len(to_visit))]
+            cell_to_visit = to_visit[random.randint(0, len(to_visit)-1)]
 
             if cell_to_visit._x1 == self.cells[i][j]._x1:
                 if cell_to_visit._y1 == self.cells[i][j]._y2:
                     self.cells[i][j].has_bottom_wall = False
+                    self._draw_cell(i, j)
+                    iterations += 1
                     self._break_walls_r(i+1, j)
                 else:
                     self.cells[i][j].has_top_wall = False
+                    self._draw_cell(i, j)
+                    iterations += 1
                     self._break_walls_r(i-1, j)
 
             if cell_to_visit._y1 == self.cells[i][j]._y1:
                 if cell_to_visit._x1 == self.cells[i][j]._x2:
                     self.cells[i][j].has_right_wall = False
+                    self._draw_cell(i, j)
+                    iterations += 1
                     self._break_walls_r(i, j+1)
                 else:
                     self.cells[i][j].has_left_wall = False
+                    self._draw_cell(i, j)
+                    iterations += 1
                     self._break_walls_r(i, j-1)
 
 
