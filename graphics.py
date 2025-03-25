@@ -108,7 +108,7 @@ class Cell():
             fill_color = "gray"
 
         line = Line(Point(x_center, y_center), Point(x_center2, y_center2))
-        self._win.draw_line(line, fill_color)
+        self.win.draw_line(line, fill_color)
 class Maze():
     def __init__(
         self,
@@ -134,9 +134,9 @@ class Maze():
         
         self._create_cells()
         self._break_entrance_and_exit()
-        self._break_walls_r2(0,0)
+        self._break_walls_r(0,0)
         self._reset_cells_visited()
-        print("hello")
+        
 
 
 
@@ -241,11 +241,10 @@ class Maze():
                 (0, 1, "right")
             ] #(di, dj, direction_name)
         while True:
-            
             valid_moves = []
             for di, dj, direction in moves:
                 ni, nj = i + di, j + dj
-                if (0 <= ni < self._num_rows and 0 <= nj <        self._num_cols and not self._cells[ni][nj].visited):
+                if (0 <= ni < self._num_rows and 0 <= nj < self._num_cols and not self._cells[ni][nj].visited):
                     valid_moves.append((ni, nj, direction)) 
 # this list stores the i, j coordinates of neighbor cell to visit and the direction to go
             if len(valid_moves) == 0:
@@ -268,6 +267,51 @@ class Maze():
                 self._cells[i][j].has_left_wall = False
         
             self._break_walls_r(ni, nj)
+
+    def _solve_maze_r(self, i, j):
+        self._animate()
+        self._cells[i][j].visited = True
+        next_index_list = []
+
+        #checks if cell is end cell
+        if self._cells[i][j] == self._cells[(self._num_cols)-1][(self._num_rows)-1]:
+            return True
+        #checks if cell is left adjacent to end cell
+        if self._cells[i][j] == self._cells[(self._num_cols)-2][(self._num_rows)-1] and self._cells[i][j].has_right_wall == False:
+            self._cells[i][j].draw_move(self._cells[(self._num_cols)-1][(self._num_rows)-1])
+            return True
+        #checks if cell is top adjacent to end cell
+        if self._cells[i][j] == self._cells[(self._num_cols)-1][(self._num_rows)-2] and self._cells[i][j].has_bottom_wall == False:
+            self._cells[i][j].draw_move(self._cells[(self._num_cols)-1][(self._num_rows)-1])
+            return True
+        
+
+            #left
+        if i > 0 and not self._cells[i - 1][j].visited and self._cells[i - 1][j].has_right_wall == False:
+                next_index_list.append((i - 1, j))
+            # right
+        if i < self._num_cols - 1 and not self._cells[i + 1][j].visited and self._cells[i + 1][j].has_left_wall == False:
+                next_index_list.append((i + 1, j))
+            # up
+        if j > 0 and not self._cells[i][j - 1].visited and self._cells[i][j-1].has_bottom_wall == False:
+                next_index_list.append((i, j - 1))
+            # down
+        if j < self._num_rows - 1 and not self._cells[i][j + 1].visited and self._cells[i][j+1].has_top_wall == False:
+                next_index_list.append((i, j + 1))
+
+        
+        for next_index in next_index_list:
+            self._cells[i][j].draw_move(self._cells[next_index[0]][next_index[1]])
+            if self._solve_maze_r(next_index[0], next_index[1]):
+                return True
+            else: self._cells[i][j].draw_move(self._cells[next_index[0]][next_index[1]], True)
+        return False
+    def solve(self):
+        self._solve_maze_r(0,0)
+
+
+
+
 
 
         
